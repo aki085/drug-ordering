@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def white_page():
-    return "こんにちは <h1>トップページ</h1>"
+    return "こんにちは <h1>トップページ</h1><>次の行です</h2>"
     
 if __name__ == "__main__":
     webbrowser.open("http://127.0.0.1:5000")
