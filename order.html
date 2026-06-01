@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>受注一覧</title>
+</head>
+<body>
+    <h1>受注一覧</h1>
+    <a href="{{ url_for('export_csv') }}">
+        <button>CSVでダウンロード</button>
+    </a>
+    <br><br>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>注文ID</th>
+            <th>患者名</th>
+            <th>薬品名</th>
+            <th>数量</th>
+            <th>注文日</th>
+            <th>操作</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order[0] }}</td>
+            <td>{{ order[1] or "未登録" }}</td>
+            <td>{{ order[2] or "未登録" }}</td>
+            <td>{{ order[3] or 0 }}</td>
+            <td>{{ order[4] }}</td>
+            <td>
+                <form action="{{ url_for('delete_order', order_id=order[0]) }}" method="post" style="display:inline;">
+                    <button type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="{{ url_for('index') }}">受注フォームに戻る</a>
+</body>
+</html>
