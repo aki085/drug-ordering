@@ -1,0 +1,34 @@
+index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>受注フォーム</title>
+</head>
+<body>
+    <h1>受注フォーム</h1>
+    <form action="/submit" method="post">
+        <label>患者名:
+            <input type="text" name="patient" required>
+        </label>
+        <br>
+        <label>薬品名:
+            <input type="text" name="drug_name" required>
+        </label>
+        <br>
+        <label>数量:
+            <input type="number" name="quantity" min="1" required>
+        </label>
+        <br>
+        <label>注文日:
+            <input type="date" name="date" required>
+        </label>
+        <br><br>
+        <button type="submit">送信</button>
+    </form>
+
+    <br>
+    <!-- 受注一覧ページへのリンク -->
+    <a href="{{ url_for('orders_list') }}">受注一覧を見る</a>
+</body>
+</html>
