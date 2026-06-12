@@ -60,28 +60,38 @@ def index():
 def submit():
     patient_name = request.form['patient'].strip()
     drug_name = request.form['drug_name'].strip()
+
     try:
         quantity = int(request.form['quantity'])
     except ValueError:
         return "数量は数字で入力してください"
+
     order_date = request.form['date']
 
     try:
         with sqlite3.connect(DB, timeout=10) as conn:
             c = conn.cursor()
+
+            # 患者登録
             c.execute("INSERT OR IGNORE INTO patients (name) VALUES (?)", (patient_name,))
             c.execute("SELECT patient_id FROM patients WHERE name = ?", (patient_name,))
             patient_id = c.fetchone()[0]
 
+            # 薬品登録
             c.execute("INSERT OR IGNORE INTO drugs (name) VALUES (?)", (drug_name,))
             c.execute("SELECT drug_id FROM drugs WHERE name = ?", (drug_name,))
             drug_id = c.fetchone()[0]
 
+            # 注文登録
             c.execute("INSERT INTO orders (patient_id, order_date) VALUES (?, ?)", (patient_id, order_date))
             order_id = c.lastrowid
 
-            c.execute("INSERT INTO order_items (order_id, drug_id, quantity) VALUES (?, ?, ?)",
-                      (order_id, drug_id, quantity))
+            # 注文アイテム登録
+            c.execute(
+                "INSERT INTO order_items (order_id, drug_id, quantity) VALUES (?, ?, ?)",
+                (order_id, drug_id, quantity)
+            )
+
     except sqlite3.OperationalError as e:
         return f"データベースエラーが発生しました: {e}"
 
@@ -103,6 +113,7 @@ def orders_list():
             ORDER BY o.order_id DESC
         ''')
         orders = c.fetchall()
+
     return render_template('orders.html', orders=orders)
 
 # --------------------
@@ -117,11 +128,11 @@ def delete_order(order_id):
             c.execute("DELETE FROM orders WHERE order_id = ?", (order_id,))
     except sqlite3.OperationalError as e:
         return f"データベースエラーが発生しました: {e}"
+
     return "<script>window.location.href='/orders';</script>"
 
 # --------------------
 # CSV出力（OS対応）
-# クエリパラメータ ?os=windows または ?os=mac
 # --------------------
 @app.route('/export_csv')
 def export_csv():
@@ -143,6 +154,7 @@ def export_csv():
     si = StringIO()
     writer = csv.writer(si)
     writer.writerow(['注文ID', '患者名', '薬品名', '数量', '注文日'])
+
     for o in orders:
         writer.writerow(o)
 
@@ -151,7 +163,7 @@ def export_csv():
     return Response(
         output,
         mimetype="text/csv",
-        headers={"Content-Disposition":"attachment;filename=orders.csv"}
+        headers={"Content-Disposition": "attachment;filename=orders.csv"}
     )
 
 # --------------------
