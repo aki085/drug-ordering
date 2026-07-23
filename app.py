@@ -103,7 +103,93 @@ def orders_list():
             ORDER BY o.order_id DESC
         ''')
         orders = c.fetchall()
-    return render_template('orders.html', orders=orders)
+    return render_template('order.html', orders=orders)
+
+@app.route('/edit/<int:order_id>', methods=['GET', 'POST'])
+def edit_order(order_id):
+
+    # 更新ボタンを押した場合
+    if request.method == 'POST':
+
+        patient_name = request.form['patient'].strip()
+        drug_name = request.form['drug_name'].strip()
+        quantity = int(request.form['quantity'])
+        order_date = request.form['date']
+
+        with sqlite3.connect(DB) as conn:
+            c = conn.cursor()
+
+            # 患者名更新
+            c.execute("""
+                UPDATE patients
+                SET name = ?
+                WHERE patient_id = (
+                    SELECT patient_id
+                    FROM orders
+                    WHERE order_id = ?
+                )
+            """, (patient_name, order_id))
+
+
+            # 薬品名更新
+            c.execute("""
+                UPDATE drugs
+                SET name = ?
+                WHERE drug_id = (
+                    SELECT drug_id
+                    FROM order_items
+                    WHERE order_id = ?
+                )
+            """, (drug_name, order_id))
+
+
+            # 数量更新
+            c.execute("""
+                UPDATE order_items
+                SET quantity = ?
+                WHERE order_id = ?
+            """, (quantity, order_id))
+
+
+            # 注文日更新
+            c.execute("""
+                UPDATE orders
+                SET order_date = ?
+                WHERE order_id = ?
+            """, (order_date, order_id))
+
+
+        return "<script>window.location.href='/orders';</script>"
+
+
+    # 編集画面を開いた場合（GET）
+    with sqlite3.connect(DB) as conn:
+        c = conn.cursor()
+
+        c.execute("""
+            SELECT
+                o.order_id,
+                p.name,
+                d.name,
+                oi.quantity,
+                o.order_date
+            FROM orders o
+            LEFT JOIN patients p
+                ON o.patient_id = p.patient_id
+            LEFT JOIN order_items oi
+                ON o.order_id = oi.order_id
+            LEFT JOIN drugs d
+                ON oi.drug_id = d.drug_id
+            WHERE o.order_id = ?
+        """, (order_id,))
+
+        order = c.fetchone()
+
+
+    return render_template('edit.html', order=order)
+    
+
+
 
 # --------------------
 # 注文削除

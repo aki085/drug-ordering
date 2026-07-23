@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>受注編集</title>
+</head>
+
+<body>
+
+<h1>受注編集</h1>
+
+<form method="post">
+
+患者名:
+<input type="text"name="patient" value="{{ order[1] }}">
+
+<br>
+
+薬品名:
+<input type="text" name="drug_name" value="{{ order[2] }}">
+
+<br>
+
+数量:
+<input type="number" name="quantity" value="{{ order[3] }}">
+
+<br>
+
+注文日:
+<input type="date" name="date" value="{{ order[4] }}">
+
+<br><br>
+
+<button type="submit">
+更新
+</button>
+
+</form>
+
+<a href="{{ url_for('orders_list') }}">
+戻る
+</a>
+
+</body>
+</html>
